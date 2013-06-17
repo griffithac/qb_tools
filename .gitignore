@@ -1,3 +1,3 @@
-source/*
-output/*
+source/
+output/
 .DS_store
