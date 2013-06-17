@@ -8,26 +8,28 @@ require 'csv'
 # be removed as they are found. 
 
 INCREASE_PERCENTAGE = 0.073
-
+HDS_CUSTOMER        = /- HDS/
+CARPET_ITEM         = /:C/
+VINYL_ITEM          = /:V/
+RENEWMAX_ITEM       = /:R/
 
 task :increase_flooring_prices do
-  
-  CSV.open("./output/output.IIF", "w", {col_sep: "\t"}) do |output_csv|
+  CSV.open("./output/output.IIF", "w", { col_sep: "\t" }) do |output_csv|
     CSV.foreach("./source/price increase.IIF", { col_sep: "\t", headers: false }) do |csv|
-
-      if csv[1] =~ /:V/ || csv[1] =~ /:C/ 
-        new_price = (csv[12].to_s.gsub(',', '').to_f * (1+INCREASE_PERCENTAGE)).round(2).to_s
+      
+      if csv[1] =~ VINYL_ITEM || csv[1] =~ CARPET_ITEM   
+        old_price = csv[12].to_s.gsub(',', '').to_f
+        markup    = 1+INCREASE_PERCENTAGE
+        new_price = (old_price * markup).round(2)
         puts "#{csv[1]}\t#{csv[12]}\t#{new_price}"
-        unless csv[1] =~ /- HDS/ 
-          csv[12] = new_price
+        unless csv[1] =~ HDS_CUSTOMER
+          csv[12] = new_price.to_s
         end
         output_csv << csv
       else
         puts "#{csv[1]}\t#{csv[12]}\t NO CHARGE"
         output_csv << csv
       end
-
     end
   end
-    
 end
